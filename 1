@@ -1,0 +1,334 @@
+#include <graphics.h> 
+#include <conio.h>  
+#include<math.h> 
+
+
+#define LEVEL_TWO_TARGET 0 
+#define LEVEL_THREE_TARGET 0 
+#define TIME_uNdFiNe 0 
+#define BAKUDAN_VALUE 200 
+#define MAX_RANKING_LIST_NUM 10 
+#define CLOCK_VALUE 250 
+struct Hook { 
+ int x; 
+ int y;     
+ int endx;  
+ int endy;   
+ int angle;   
+ int len; 
+
+ 
+ 
+}hook,gouzi; 
+typedef struct ITEM 
+{ 
+ int x; 
+ int y; 
+ bool flag;
+ int type;
+ int value;
+ bool find;
+ 
+ struct ITEM* next; 
+}item; 
+enum TYPE 
+{ 
+ GOLD, 
+ 
+ 
+ DIAMOND, 
+ M_NOMAL, 
+ M_LONG, 
+ M_SHORT, 
+}; 
+typedef struct info 
+{ 
+ char name[20]; 
+ int points; 
+}INFO; 
+ 
+ 
+int initialize_enterscreen(ITEM * pHead); 
+ITEM * create(void); 
+void textinput(int x6, int xfw, int yfw, char* q);
+void textsettings(void); 
+void draw_items(ITEM * pHead); 
+void shop(void);                         
+文件，再进入下一关（再次新建） 
+void settings(void); 
+void pass(void); 
+void write_in_txt(void); 
+void show_ranking_list(void); 
+void use_prop(void); 
+char name[100]; 
+TCHAR value[20]; 
+TCHAR T_ime[20]; 
+TCHAR LEVEL_NUM[20]; 
+TCHAR TARGET[20]; 
+TCHAR COINS[20]; 
+ 
+ 
+TCHAR BAKUDAN_NUM[20]; 
+TCHAR CLOCK_NUM[20]; 
+TCHAR show_points[20]; 
+int value_trans; 
+bool click_result; 
+int key_judge(void);                         
+int state_judge(int x1, int x2, int y1, int y2);//判断鼠标位置是否符合要求 x1-x2,y1-y2 
+int distant(Hook hook); 
+void hook_wave(void); 
+void hook_grab(int speed); 
+void grab_judge(ITEM * pHead); 
+void dead(void); 
+
+int TIME; 
+int REAL_TIME; 
+void time(void); 
+int total_value; 
+int com_value; 
+int target[3] = { LEVEL_ONE_TARGET,LEVEL_TWO_TARGET,LEVEL_THREE_TARGET }; 
+int bakudan_value; 
+int clock_value; 
+int coins; 
+int bakuda_num; 
+int clock_num; 
+int data_num; 
+ITEM* pNow_1; 
+ITEM* pNow_2; 
+ITEM* pReal = (ITEM*)malloc(sizeof(ITEM));; 
+
+ 
+ 
+int main() 
+{ 
+ ITEM* pHead = create(); 
+ DWORD t1, t2; 
+ t1 = t2 = GetTickCount();  
+ initgraph(960, 540, SHOWCONSOLE); 
+  
+ textsettings();              //字体样式设置 
+ printf("测试：程序正常启动\n"); 
+ if (initialize_enterscreen(pHead))    //开始界面 
+  draw_items(pHead);                    //进入主界面 
+ else 
+ { 
+  TCHAR s[] = _T("程序出错，请联系我！"); 
+  outtextxy(200, 240, s); 
+ } 
+
+  
+ BeginBatchDraw(); 
+ while (1) 
+ { 
+  printf("进入循环了啊啊啊啊啊啊啊啊啊啊啊啊\n"); 
+  if (TIME == 0) 
+  { 
+   com_value = value_trans; 
+   total_value += value_trans; 
+   coins = total_value; 
+   value_trans = 0; 
+   TIME = 100 * LEVEL_TWO_TIMELIMIT; 
+   EndBatchDraw(); 
+   break; 
+  } 
+  if (t2 - t1 > 15) 
+  { 
+ 
+ 
+   hook_wave(); 
+   t1 = t2; 
+  } 
+  t2 = GetTickCount(); 
+  use_prop(); 
+  time(); 
+  printf("%d\n", TIME); 
+  draw_items(pHead); 
+  hook_grab(3); 
+  printf("grab\n"); 
+  grab_judge(pHead); 
+   
+  FlushBatchDraw(); 
+ } 
+ if (com_value >= LEVEL_ONE_TARGET) 
+ { 
+  printf("关卡结束判定测试：【判定成功】已过关\n"); 
+ 
+ 
+  LEVEL++; 
+  com_value = 0; 
+  shop(); 
+ } 
+ else 
+ { 
+  printf("关卡结束判定测试：【判定成功】未过关\n"); 
+  dead(); 
+  return 0; 
+ } 
+
+ initgraph(960, 540,SHOWCONSOLE); 
+ textsettings(); 
+ BeginBatchDraw(); 
+ while (1) 
+ { 
+  if (TIME == 0) 
+ 
+ 
+  { 
+   com_value = value_trans; 
+   total_value += value_trans; 
+   coins = coins + total_value; 
+   value_trans = 0; 
+   TIME = 100 * LEVEL_THREE_TIMELIMIT; 
+   EndBatchDraw(); 
+   break; 
+  } 
+  if (t2 - t1 > 15) 
+  { 
+   hook_wave(); 
+   t1 = t2; 
+  } 
+  t2 = GetTickCount(); 
+  use_prop(); 
+  time(); 
+ 
+ 
+  draw_items(pHead); 
+  hook_grab(3); 
+  grab_judge(pHead); 
+  FlushBatchDraw(); 
+ } 
+ if (com_value >= LEVEL_TWO_TARGET) 
+ { 
+  LEVEL++; 
+  com_value = 0; 
+  shop(); 
+ } 
+ else 
+ { 
+  dead(); 
+  return 0; 
+ } 
+ 
+ 
+ initgraph(960, 540, SHOWCONSOLE); 
+ textsettings(); 
+ BeginBatchDraw(); 
+ while (1) 
+ { 
+  if (TIME == 0) 
+  { 
+   com_value = value_trans; 
+   total_value += value_trans; 
+   coins = coins + total_value; 
+   value_trans = 0; 
+   TIME = TIME_uNdFiNe; 
+   EndBatchDraw(); 
+   break; 
+  } 
+  if (t2 - t1 > 15) 
+  { 
+ 
+ 
+   hook_wave(); 
+   t1 = t2; 
+  } 
+  t2 = GetTickCount(); 
+  use_prop(); 
+  time(); 
+  draw_items(pHead); 
+  hook_grab(3); 
+  grab_judge(pHead); 
+  FlushBatchDraw(); 
+ } 
+ if (com_value >= LEVEL_THREE_TARGET) 
+ { 
+  //com_value = 0; 
+  pass();//恭喜过关 end 
+ } 
+ else 
+ 
+ 
+  dead(); 
+ _getch(); 
+ closegraph(); 
+ return 0; 
+}  
+int initialize_enterscreen(ITEM * pHead) 
+{ 
+  
+ IMAGE start,startbottom2,login_pic; 
+ int i = 0; 
+ loadimage(&start, _T("..//picture//pictures//start.png")); 
+ loadimage(&startbottom2, _T("..//picture//pictures//startbottom2.png")); 
+ putimage(0, 0, &start); 
+ putimage(120, 430, &startbottom2); 
+ 
+ 
+ srand(GetTickCount()); 
+ bakuda_num = 0; 
+ clock_num = 0; 
+ coins = 0; 
+ data_num = 0; 
+ printf("测试：程序加载资源成功\n"); 
+ //初始化关卡编号 
+ LEVEL = 1; 
+ //初始化时间 
+ TIME = 100 * LEVEL_ONE_TIMELIMIT; 
+ //初始化PAUSE按钮判断 
+ PAUSE = FALSE; 
+ click_result = FALSE; 
+ //初始化分数 
+ value_trans = 0; 
+ total_value = 0; 
+ com_value = 0; 
+ 
+ 
+ 
+ //初始化物品 
+ ITEM* pNow = (ITEM*)malloc(sizeof(ITEM)); 
+ pNow = pHead->next; 
+ printf("初始化测试：\n"); 
+ while (NULL != pNow) 
+ { 
+  pNow->flag = true; 
+  pNow->size = 60; 
+  pNow->type = rand() % 3; 
+  pNow->x = rand() % 800 + 50; 
+  pNow->y = rand() % 400 + 120; 
+  pNow->value = 0; 
+  pNow->find = false; 
+  if (pNow->type == GOLD) 
+   pNow->value = GOLD_VALUE; 
+  else if (pNow->type == STONE) 
+ 
+ 
+   pNow->value = STONE_VALUE; 
+  else 
+   pNow->value = DIAMOND_VALUE; 
+  printf("type=%d\tx=%d\ty=%d\tvalue=%d\n", pNow->type, pNow->x, pNow->y, 
+pNow->value); 
+  pNow = pNow->next; 
+ } 
+  
+ //初始化物品 
+ bakudan_value = BAKUDAN_VALUE; 
+ clock_value = CLOCK_VALUE; 
+  
+ //初始化钩子 
+ hook.x = 455; 
+ hook.endx = hook.x; 
+ hook.y = 50; 
+ hook.endy = hook.y + hook.len; 
+ hook.len = 50; 
+ 
+ 
+ hook.angle = 0; 
+ hook.direction = RIGHT; 
+ hook.speed_x = 0; 
+ hook.speed_y = 0; 
+ hook.action = M_NOMAL; 
+ hook.index = -1; 
+ //钩头 
+ gouzi.x = hook.x - 18;
+ }}}}}}}
+ 
